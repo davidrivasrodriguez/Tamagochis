@@ -1,0 +1,56 @@
+.board {
+    display: grid;
+    grid-template-columns: repeat(3, 100px); 
+    grid-template-rows: repeat(3, 100px);
+    gap: 5px; 
+    position: relative;
+}
+
+.tile {
+    position: relative;
+    border: 1px dotted #000000;
+    z-index: 1;
+    transition: none !important;
+
+}
+
+.bush {
+    z-index: 999 !important;
+    background-image: url('../img/bush.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+}
+
+.player {
+    transform-origin: center;
+    transition: transform 0.3s ease-in-out;
+}
+
+.tile.player::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: url('../img/player.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    transform-origin: center;
+    z-index: 2 !important;
+}
+
+.tile.player[data-occupied="true"] {
+    z-index: 2 !important;
+}
+
+#game-controls button:active {
+    transform: scale(0.95) !important;
+    background: #f0f0f0;
+}
+
+#game-controls button:hover {
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
