@@ -20,14 +20,15 @@
     background-size: contain;
     background-repeat: no-repeat;
     background-position: center;
+    transform: none !important;
 }
 
-.player {
+/* .player {
     transform-origin: center;
     transition: transform 0.3s ease-in-out;
-}
+} */
 
-.tile.player::after {
+.tile.player::before {
     content: '';
     position: absolute;
     top: 0;
@@ -40,6 +41,10 @@
     background-position: center;
     transform-origin: center;
     z-index: 2 !important;
+
+
+    transform-origin: center;
+    transition: transform 0.3s ease-in-out;
 }
 
 .tile.player[data-occupied="true"] {
@@ -53,4 +58,30 @@
 
 #game-controls button:hover {
     box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+
+
+#messages {
+    position: absolute;
+    width: 50%;
+    top: 0;
+    left: 40%;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    flex-flow: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 999;
+    display: none;
+
+    div {
+        padding: 15px;
+        background: rgba(0, 0, 0, 0.1);
+        border-radius: 10px;
+
+        font-size: 20px;
+        font-family: 'Roboto', sans-serif;
+    }
 }

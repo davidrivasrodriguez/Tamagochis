@@ -18,6 +18,43 @@ UIv1.initUI = () => {
     base.classList.add("board");
 }
 
+// UIv1.drawBoard = (board) => {
+//     if (board !== undefined && board.elements !== undefined) {
+//         const base = document.getElementById(UIv1.uiElements.board);
+//         base.innerHTML = '';
+
+//         base.style.gridTemplateColumns = `repeat(${board.size}, ${TILE_SIZE}px)`;
+//         base.style.gridTemplateRows = `repeat(${board.size}, ${TILE_SIZE}px)`;
+
+//         for (let y = 0; y < board.size; y++) {
+//             for (let x = 0; x < board.size; x++) {
+//                 const tile = document.createElement("div");
+//                 tile.classList.add("tile");
+//                 tile.dataset.x = x;
+//                 tile.dataset.y = y;
+//                 tile.dataset.occupied = 'false';
+
+//                 const isBush = board.elements.some(element =>
+//                     element.x === x && element.y === y
+//                 );
+
+//                 if (isBush) {
+//                     tile.classList.add('bush');
+//                 }
+
+//                 base.appendChild(tile);
+//                 anime({
+//                     targets: tile,
+//                     opacity: [0, 1],
+//                     duration: (Math.random() * 8000) + 1000,
+//                     easing: 'easeInOutQuad'
+//                 });
+//             }
+//         }
+//     }
+// }
+
+
 UIv1.drawBoard = (board) => {
     if (board !== undefined && board.elements !== undefined) {
         const base = document.getElementById(UIv1.uiElements.board);
@@ -30,9 +67,9 @@ UIv1.drawBoard = (board) => {
             for (let x = 0; x < board.size; x++) {
                 const tile = document.createElement("div");
                 tile.classList.add("tile");
-                tile.dataset.x = x;
-                tile.dataset.y = y;
-                tile.dataset.occupied = 'false';
+                // tile.dataset.x = x;
+                // tile.dataset.y = y;
+                // tile.dataset.occupied = 'false';
 
                 const isBush = board.elements.some(element =>
                     element.x === x && element.y === y
@@ -53,6 +90,7 @@ UIv1.drawBoard = (board) => {
         }
     }
 }
+
 
 // UIv1.drawPlayer = (board, players) => {
 //     const base = document.getElementById(UIv1.uiElements.board);
@@ -92,8 +130,9 @@ UIv1.drawPlayer = (board, players) => {
     const tiles = document.querySelectorAll('.tile');
     tiles.forEach(tile => {
         tile.classList.remove('player');
-        tile.setAttribute('data-occupied', 'false');
+        // tile.setAttribute('data-occupied', 'false');
     });
+
 
     // const rotations = {
     //     'UP': 270,
@@ -103,19 +142,46 @@ UIv1.drawPlayer = (board, players) => {
     // };
 
     players.forEach(player => {
-        const tile = Array.from(base.children)
-            .find(tile => Number(tile.dataset.x) === player.x && Number(tile.dataset.y) === player.y);
+        const tileIndex = (player.y * board.size) + player.x;
+        const tile = base.children[tileIndex];
 
+        console.log("Player:", player);
+        console.log("Visibildad: " + player.visibility);
         if (tile) {
             tile.classList.add('player');
-            tile.dataset.occupied = 'true';
             
-
             const currentRotation = Directions[player.prevDirection];
             const targetRotation = Directions[player.direction];
-
             let rotationDiff = targetRotation - currentRotation;
 
+            const element = board.elements.find(tile => tile.x === player.x && tile.y === player.y);
+            if (element) {
+                element.occupied = true;
+                element.player = player;
+
+                console.log("Elemento ocupado", element);
+            }
+
+
+
+            if(player.visibility === false) {
+                tile.classList.remove('player');
+
+                if(player.name === ConnectionHandler.playerName) {
+                    const messages = document.getElementById('messages');
+                    const message = document.createElement('div');
+                    messages.innerHTML = '';
+                    message.innerHTML = "You are HIDDEN!!";
+                    messages.appendChild(message);
+                    messages.style.display = 'flex';
+                }
+            } else {
+                if(player.name === ConnectionHandler.playerName) {
+                    const messages = document.getElementById('messages');
+                    messages.innerHTML = '';
+                    messages.style.display = 'none';
+                }
+            }
             anime({
                 targets: tile,
                 rotate: [currentRotation, currentRotation + rotationDiff],
@@ -123,6 +189,8 @@ UIv1.drawPlayer = (board, players) => {
                 easing: 'easeInOutQuad'
             });
         }
+
+
     });
 };
 
@@ -149,7 +217,6 @@ UIv1.manageControllers = () => {
 
     moveButton.addEventListener('click', () => {
         if (ConnectionHandler?.socket && UIv1.gameService) {
-            console.log("Move forward action triggered");
             UIv1.gameService.do_move({ action: 'FORWARD' });
         } else {
             console.log("No socket connection available");
@@ -163,23 +230,25 @@ UIv1.manageControllers = () => {
 
     rotateButton.addEventListener('click', () => {
         if (ConnectionHandler?.socket && UIv1.gameService) {
-            const player = UIv1.gameService.findCurrentPlayer();
-            if (player) {
+            UIv1.gameService.do_move({ action: 'ROTATE' });
+            
+            // const player = UIv1.gameService.findCurrentPlayer();
+            // if (player) {
                 // const directions = ['UP', 'RIGHT', 'DOWN', 'LEFT'];
                 // const currentIndex = directions.indexOf(player.direction);
                 // const newIndex = (currentIndex + 1) % directions.length;
                 // player.direction = directions[newIndex];
 
 
-                UIv1.gameService.do_move({ action: 'ROTATE' });
+                // UIv1.gameService.do_move({ action: 'ROTATE' });
 
                 // ConnectionHandler.socket.emit("message", {
                 //     type: "ROTATE",
                 //     content: { player }
                 // });
-            } else {
-                console.log("No se encontró el jugador actual");
-            }
+            // } else {
+            //     console.log("No se encontró el jugador actual");
+            // }
         } else {
             console.log("No hay conexión disponible");
         }

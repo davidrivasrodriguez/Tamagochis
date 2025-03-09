@@ -1,10 +1,10 @@
-export const ELEMENTS = {
-    bush : 5,
-};
+// export const ELEMENTS = {
+//     bush : 5,
+// };
 
-export const RoomConfig = {
-    maxRoomPlayers : 2
-};
+// export const RoomConfig = {
+//     maxRoomPlayers : 2
+// };
 
 export class Board {
     #map = null;
@@ -18,12 +18,12 @@ export class Board {
         this.#state = this.#states.NO_BUILD;
     }
 
-    build(payload) {
-        const { size, elements } = payload;
-        this.#map = new Array(size).fill().map(() => new Array(size).fill(0));
-        elements.forEach(element=> this.#map[element.x][element.y]= ELEMENTS.bush);
-        this.#state = this.#states.BUILD;
-    }
+    // build(payload) {
+    //     const { size, elements } = payload;
+    //     this.#map = new Array(size).fill().map(() => new Array(size).fill(0));
+    //     elements.forEach(element=> this.#map[element.x][element.y]= ELEMENTS.bush);
+    //     this.#state = this.#states.BUILD;
+    // }
 
     get map() {
         if (this.#state === this.#states.BUILD) {

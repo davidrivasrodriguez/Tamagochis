@@ -26,7 +26,7 @@ export class GameService {
     return {
       id: socket.id,
       socket: socket,
-      name: socket.data.playerName || `Player${Math.random().toString(36)}`,
+      name: socket.data.playerName,
       x: 0,
       y: 0,
       state: PlayerStates.Idle,
@@ -56,7 +56,7 @@ export class GameService {
       let newY = player.y;
 
       const board = room.game?.board;
-      const boardSize = board?.size || 8;
+      const boardSize = board?.size || 10;
       const maxX = boardSize - 1;
       const maxY = boardSize - 1;
 
@@ -83,6 +83,16 @@ export class GameService {
       player.direction = updates.direction;
     }
 
+    const isPlayerInBush = room.game?.board.elements.some(
+      (element) =>
+        element.x === player.x && element.y === player.y && element.bush
+    );
+    if (isPlayerInBush) {
+      player.visibility = false;
+    } else {
+      player.visibility = true;
+    }
+
     ServerService.getInstance().sendMessage(
       roomName,
       Messages.UPDATE_POSITIONS,
@@ -93,6 +103,7 @@ export class GameService {
             x: player.x,
             y: player.y,
             direction: player.direction,
+            visibility: player.visibility,
           },
         ],
       }
@@ -101,12 +112,16 @@ export class GameService {
     return true;
   }
 
-public shoot(shooterId: string, shootedId: string, roomName: string): boolean {
-  console.log("Shoot at GameService", shooterId, shootedId, roomName);
+  public shoot(
+    shooterId: string,
+    shootedId: string,
+    roomName: string
+  ): boolean {
+    console.log("Shoot in GameService", shooterId, shootedId, roomName);
 
-  ServerService.getInstance().sendMessage(roomName, Messages.SHOOT, {});
-  return true;
-}
+    ServerService.getInstance().sendMessage(roomName, Messages.SHOOT, {});
+    return true;
+  }
 
   // public addPlayer(player: Player): boolean {
   //     const room: Room = RoomService.getInstance().addPlayer(player);
@@ -155,7 +170,7 @@ public shoot(shooterId: string, shootedId: string, roomName: string): boolean {
       this.games.push(game);
     }
 
-    const boardSize = room.game!.board.size || 8;
+    const boardSize = room.game!.board.size;
     const maxX = boardSize - 1;
     const maxY = boardSize - 1;
 
@@ -175,20 +190,16 @@ public shoot(shooterId: string, shootedId: string, roomName: string): boolean {
         )
     );
 
-    if (availableCorners.length > 0) {
-      const randomIndex = Math.floor(Math.random() * availableCorners.length);
-      player.x = availableCorners[randomIndex].x;
-      player.y = availableCorners[randomIndex].y;
-    } else {
-      player.x = 0;
-      player.y = 0;
-    }
+    const randomIndex = Math.floor(Math.random() * availableCorners.length);
+    player.x = availableCorners[randomIndex].x;
+    player.y = availableCorners[randomIndex].y;
 
     ServerService.getInstance().sendMessage(room.name, Messages.NEW_PLAYER, {
       id: player.id,
       x: player.x,
       y: player.y,
       direction: player.direction,
+      visibility: player.visibility,
     });
 
     if (room.players.length === RoomConfig.maxRoomPlayers) {

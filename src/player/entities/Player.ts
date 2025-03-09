@@ -5,7 +5,6 @@ export enum Directions {
   Right = "RIGHT",
   Down = "DOWN",
   Left = "LEFT",
-  Idle = "IDLE",
 }
 
 export enum PlayerStates {

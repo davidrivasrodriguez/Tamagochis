@@ -1,6 +1,6 @@
 import { Board } from "../entities/Board.js";
 import { Queue } from "../Queue.js";
-import { RoomConfig } from "../entities/Board.js";
+// import { RoomConfig } from "../entities/Board.js";
 import { ConnectionHandler } from "./ConnectionHandler.js";
 
 export class GameService {
@@ -21,7 +21,7 @@ export class GameService {
         "BOARD": this.do_newBoard.bind(this),
         "MOVE": this.do_move.bind(this),
         "UPDATE_POSITIONS": this.do_updatePositions.bind(this),
-        "SHOOT": this.do_shoot.bind(this)
+        // "SHOOT": this.do_shoot.bind(this)
     };
 
     constructor(ui) {
@@ -75,10 +75,10 @@ export class GameService {
     // }
 
     async do_newPlayer(payload) {
-        console.log("Received new player:", payload);
-        console.log("Content:", payload.content);
+        // console.log("Received new player:", payload);
+        // console.log("Content:", payload.content);
 
-        const playerData = payload.content || payload;
+        const playerData=  payload;
         const existingPlayer = this.#players.find(p => p.id === playerData.id);
 
         if (!existingPlayer) {
@@ -88,6 +88,7 @@ export class GameService {
                 x: playerData.x,
                 y: playerData.y,
                 direction: playerData.direction,
+                visibility: playerData.visibility
             };
             this.#players.push(player);
             console.log("Players after adding new one:", this.#players);
@@ -102,12 +103,12 @@ export class GameService {
 
     async do_newBoard(payload) {
         this.#board = payload;
-        console.log("Processed board data:", this.#board);
+        // console.log("Processed board data:", this.#board);
 
         this.#ui.drawBoard(this.#board);
 
         if (this.#players.length > 0) {
-            console.log("Drawing players on new board:", this.#players);
+            // console.log("Drawing players on new board:", this.#players);
             this.#ui.drawPlayer(this.#board, this.#players);
             this.#ui.manageControllers();
         }
@@ -121,6 +122,7 @@ export class GameService {
                     type: "MOVE",
                     content: { playerId: player.id, action: payload.action }
                 });
+                console.log("Esta es la accion -> " + payload.action);
 
                 // if (payload.action === 'ROTATE') {
                 //     ConnectionHandler.socket.emit("message", {
@@ -145,27 +147,30 @@ export class GameService {
                 const existingPlayer = this.#players.find(p => p.id === updatedPlayer.id);
                 if (existingPlayer) {
                     existingPlayer.prevDirection = existingPlayer.direction;
-                    Object.assign(existingPlayer, updatedPlayer);
+                    existingPlayer.x = updatedPlayer.x;
+                    existingPlayer.y = updatedPlayer.y;
+                    existingPlayer.direction = updatedPlayer.direction;
+                    existingPlayer.visibility = updatedPlayer.visibility;
                 }
             });
             this.#ui.drawPlayer(this.#board, this.#players);
         }
     }
 
-    async do_shoot(payload) {
-        console.log("Shooting action triggered");
-        const player = this.findCurrentPlayer();
-        if (player) {
-            ConnectionHandler.socket.emit("message", {
-                type: "SHOOT",
-                content: { playerId: player.id }
-            });
-        }
-    }
+    // async do_shoot(payload) {
+    //     console.log("Shooting action triggered");
+    //     const player = this.findCurrentPlayer();
+    //     if (player) {
+    //         ConnectionHandler.socket.emit("message", {
+    //             type: "SHOOT",
+    //             content: { playerId: player.id }
+    //         });
+    //     }
+    // }
 
     findCurrentPlayer() {
-        console.log("All players:", this.#players);
-        console.log("Looking for name:", ConnectionHandler.playerName);
+        // console.log("All players:", this.#players);
+        // console.log("Looking for name:", ConnectionHandler.playerName);
         const player = this.#players.find(player => player.name === ConnectionHandler.playerName);
         console.log("Found player:", player);
         return player;

@@ -59,8 +59,14 @@ export class ServerService {
 
     this.io.on("connection", (socket) => {
       socket.emit("connectionStatus", { status: true });
-      const newPlayer = GameService.getInstance().buildPlayer(socket);
-      GameService.getInstance().addPlayer(newPlayer);
+      // const newPlayer = GameService.getInstance().buildPlayer(socket);
+      // GameService.getInstance().addPlayer(newPlayer);
+
+      socket.on("register", () => {
+        const newPlayer = GameService.getInstance().buildPlayer(socket);
+        GameService.getInstance().addPlayer(newPlayer);
+      });
+
 
       socket.on("message", (data) => {
         if (data.type === Messages.UPDATE_POSITIONS) {
@@ -97,6 +103,7 @@ export class ServerService {
                   x: player.x,
                   y: player.y,
                   direction: player.direction,
+                  visibility: player.visibility,
                 }));
               const updatePayload = { players };
               ServerService.getInstance().sendMessage(
@@ -106,9 +113,10 @@ export class ServerService {
               );
             }
           }
-        } else if (data.type === "SHOOT") {
-          console.log("SHOOT received at Server Service");
-        }
+        } 
+        // else if (data.type === "SHOOT") {
+        //   console.log("SHOOT received at Server Service");
+        // }
       });
 
       socket.on("disconnect", () => {
@@ -134,9 +142,6 @@ export class ServerService {
     }
   }
 
-  public gameStartMessage() {
-    //
-  }
 
   public isActive() {
     return this.active;

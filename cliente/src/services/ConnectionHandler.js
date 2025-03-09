@@ -7,49 +7,79 @@ export const ConnectionHandler = {
     controller: null,
     playerName: null,
 
-        init: (url, controller, onConnectedCallBack, onDisconnectedCallBack) => {
+    init: (url, controller, onConnectedCallBack, onDisconnectedCallBack) => {
         ConnectionHandler.controller = controller;
         ConnectionHandler.playerName = `Player${Math.floor(Math.random() * 1000)}`;
-    
+
         let { socket } = ConnectionHandler;
         socket = io(url);
         ConnectionHandler.socket = socket;
         socket.on("connect", () => {
             socket.emit("register", { name: ConnectionHandler.playerName, type: "PLAYER" });
         });
-    
+
         socket.on("connectionStatus", (data) => {
             ConnectionHandler.connected = true;
             ConnectionHandler.controller.gameService.setState('PLAYING');
             onConnectedCallBack();
         });
-    
+
+
+        // socket.on("message", (payload) => {
+        //     console.log("Message received:", payload);
+        //     if (payload.type && payload.content) {
+        //         if (payload.type === "NEW_PLAYER") {
+        //             ConnectionHandler.controller.gameService.do({
+        //                 type: "NEW_PLAYER",
+        //                 content: payload.content
+        //             });
+        //         } else if (payload.type === "BOARD") {
+        //             ConnectionHandler.controller.gameService.do({
+        //                 type: "BOARD",
+        //                 content: payload.content
+        //             });
+        //         } else if (payload.type === "UPDATE_POSITIONS") { 
+        //             ConnectionHandler.controller.gameService.do({
+        //                 type: "UPDATE_POSITIONS",
+        //                 content: payload.content
+        //             });
+        //             console.log("UPDATE_POSITIONS", payload.content);
+        //         }
+        //     } else {
+        //         console.error("Invalid message format:", payload);
+        //     }
+        // });
+
 
         socket.on("message", (payload) => {
             console.log("Message received:", payload);
-            if (payload.type && payload.content) {
-                if (payload.type === "NEW_PLAYER") {
+
+            switch (payload.type) {
+                case "NEW_PLAYER":
                     ConnectionHandler.controller.gameService.do({
                         type: "NEW_PLAYER",
                         content: payload.content
                     });
-                } else if (payload.type === "BOARD") {
+                    break;
+                case "BOARD":
                     ConnectionHandler.controller.gameService.do({
                         type: "BOARD",
                         content: payload.content
                     });
-                } else if (payload.type === "UPDATE_POSITIONS") { 
+                    break;
+                case "UPDATE_POSITIONS":
                     ConnectionHandler.controller.gameService.do({
                         type: "UPDATE_POSITIONS",
                         content: payload.content
                     });
-                    console.log("UPDATE_POSITIONS", payload.content);
-                }
-            } else {
-                console.error("Invalid message format:", payload);
+                    // console.log("UPDATE_POSITIONS", payload.content);
+                    break;
+                default:
+                    console.error("Invalid message type:", payload.type);
+                    break;
             }
         });
-    
+
         socket.on("disconnect", () => {
             ConnectionHandler.connected = false;
             onDisconnectedCallBack();
